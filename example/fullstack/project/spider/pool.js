@@ -26,6 +26,7 @@ function Pool(source){
 }
 
 //获取url的函数
+// 伪造了请求数据
 function getURL(address) {
   return encodeURI('http://restapi.amap.com/v3/geocode/geo?key=46799a1920f8b8914ad7d0a2db0096d1&address=' + address);
 }
@@ -50,20 +51,21 @@ Pool.prototype = {
       body = JSON.parse(body);
       data = body.geocodes; // 地理信息
       if(!data || !data[0]) return this.onProcessed(); // 处理地理信息
-      d = data[0];
-      var location = d.location;
-      if(!d.location) return this.onProcessed(); 
+      d = data[0]; // 拿到地理坐标
+      var location = d.location; //坐标地址?
+      if(!d.location) return this.onProcessed(); // 没拿坐标的时候再加载一次
       location = location.split(',');
-      obj.lat = parseFloat(location[1], 10);
-      obj.lng = parseFloat(location[0], 10);
-      obj.price = obj.avr_price;
+      obj.lat = parseFloat(location[1], 10); // 坐标，纬度
+      obj.lng = parseFloat(location[0], 10); // 坐标 经度
+      obj.price = obj.avr_price; // 平均价格
       //
-      console.log(this.spiderIndex + '|' + this.queryingIndex);
-      update(obj);
-      return this.onProcessed();
+      // console.log(this.spiderIndex + '|' + this.queryingIndex); // 爬虫索引
+      console.log("进度 ：", this.spiderIndex, " / ", poolCount , " / ", this.source.length );
+      update(obj); // 更新数据库
+      return this.onProcessed(); // 重新加载
     } else {
       console.log('错误');
-      return this.onProcessed();
+      return this.onProcessed(); // 重新加载
     }
   },
   onProcessed: function(){
@@ -74,26 +76,29 @@ Pool.prototype = {
   },
   query: function(){ // 查询逻辑
     if (this.queryingIndex > poolCount) return console.log('done'); // 请求全部成功了，没有需要重复的啦
-    var obj = this.source[this.spiderIndex];
-    console.log(obj)
-    var url = getURL(obj.address);
-    request.get(url, function(e, res, body){
+    var obj = this.source[this.spiderIndex]; // 游标遍历小区信息
+    // console.log(obj); // 打印小区信息
+    var url = getURL(obj.address); // "address": "威宁路339弄"，以地址检索
+    request.get(url, function(e, res, body){    // 从amap拿数据
       this.process(e, res, body, obj);
     }.bind(this));
-    this.spiderIndex = this.spiderIndex + 1;
+    this.spiderIndex = this.spiderIndex + 1; // 游标后移
     this.queryingIndex = this.queryingIndex + 1;
-    if(this.queryingIndex < poolCount) this.query();
+    if(this.queryingIndex < poolCount) this.query(); // pool数据没有跑完就继续跑
   }
 };
 
 
+/*
+* 更新数据库
+* */
 function update(obj) {
   Mongo.community.findOneAndUpdate({
     community_id: obj.community_id
   }, obj, {
     upsert: true
   }, function(e, d) {
-    console.log('更新成功...');
+    // console.log('更新成功...');
   });
 }
 

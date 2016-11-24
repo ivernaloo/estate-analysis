@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "spider": "node spider",
-    "start": "node ./bin/www"
+    "spider": "nodemon spider",
+    "start": "nodemon ./bin/www --verbose"
   },
   "dependencies": {
     "body-parser": "~1.15.1",
