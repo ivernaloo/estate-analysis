@@ -14,6 +14,11 @@ var Mongo = require('./../mongo');
 var poolCount = 20;
 var timeout = 100;
 
+
+/*
+* addresses
+* source {Array} properties code array
+* */
 function Pool(source){
   this.source = source;
   this.reset();
@@ -26,18 +31,25 @@ function getURL(address) {
 }
 
 Pool.prototype = {
-  reset: function(){
+  reset: function(){  // 数据重置
     this.spiderIndex = 0;
     this.queryingIndex = 0;
   },
-  init: function(){
+  init: function(){ // 初始化
     this.querying = [];
   },
+  /*
+  * 处理抓取的数据
+  * e 请求结果
+  * res 请求的返回值
+  * body 请求返回的body
+  * object 
+  * */
   process: function(e, res, body, obj){
     if (!e && res.statusCode == 200) {
       body = JSON.parse(body);
-      data = body.geocodes;
-      if(!data || !data[0]) return this.onProcessed();
+      data = body.geocodes; // 地理信息
+      if(!data || !data[0]) return this.onProcessed(); // 处理地理信息
       d = data[0];
       var location = d.location;
       if(!d.location) return this.onProcessed(); 
@@ -55,13 +67,13 @@ Pool.prototype = {
     }
   },
   onProcessed: function(){
-    this.queryingIndex--;
-    setTimeout(function(){
-      this.query();
-    }.bind(this), timeout);
+    this.queryingIndex--; // 重复请求一次
+    setTimeout(function(){ // 再请求一次?
+      this.query(); // 查询逻辑
+    }.bind(this), timeout); // 把pool的对象传入
   },
-  query: function(){
-    if (this.queryingIndex > poolCount) return console.log('done');
+  query: function(){ // 查询逻辑
+    if (this.queryingIndex > poolCount) return console.log('done'); // 请求全部成功了，没有需要重复的啦
     var obj = this.source[this.spiderIndex];
     console.log(obj)
     var url = getURL(obj.address);

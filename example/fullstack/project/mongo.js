@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://0.0.0.0:27017/hospital');
+mongoose.connect('mongodb://114.215.139.174:27017/hospital');
 
 var Community = require('./models/community');
 
