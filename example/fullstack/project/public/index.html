@@ -47,7 +47,6 @@
 
   var tileLayer = L.tileLayer('//map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
-  
   var priceRange = [80000, 150000];
   var circles = [];
   //获取数据
@@ -55,7 +54,7 @@
   var dataIndex = 0;
   fetch('./community')
   .then(function(response) {
-    return response.json();
+    return response.json(); // 拿到数据
   })
   .then(function(ds){
     ds
@@ -67,9 +66,9 @@
     .forEach(function(d){
       var price = d.price;
       var priceMin = priceRange[0], priceMax = priceRange[1];
-      var price01 = getK(price, priceMin, priceMax);
-      var size = getSize(price01);
-      var color = getColor(price01);
+      var price01 = getK(price, priceMin, priceMax); // 归一化，在范围内的一个比值结果，没有量纲
+      var size = getSize(price01); // 颜色比例
+      var color = getColor(price01); // 颜色
       //
       var circle = L.circleMarker({
         lat: d.lat,
@@ -116,9 +115,9 @@
 
   //颜色映射函数
   var crange = ['rgba(0,0,250,0.9)', 'rgba(255,27,188,0.9)'];
-  function getColor(ki){
-    var cminArray = str2array(crange[0]);
-    var cmaxArray = str2array(crange[1]);
+  function getColor(ki){ //颜色的归一化，真有意思
+    var cminArray = str2array(crange[0]); // [0, 0, 250, 0.9]
+    var cmaxArray = str2array(crange[1]); // [255,27,188,0.9]
     //
     var r = Math.floor(cminArray[0] + (cmaxArray[0] - cminArray[0]) * ki);
     var g = Math.floor(cminArray[1] + (cmaxArray[1] - cminArray[1]) * ki);
@@ -129,7 +128,7 @@
   }
 
   // 大小映射函数
-  var rrange = [2, 10]
+  var rrange = [2, 10] // 2~10之间
   function getSize(ki){
     var rmin = rrange[0], rmax = rrange[1];
     return rmin + (rmax - rmin) * ki;
@@ -151,7 +150,7 @@
     });
   }
 
-  var gui = new dat.gui.GUI();
+  var gui = new dat.gui.GUI(); // 控制面板
   var p1 = gui.addFolder('颜色');
   p1.addColor(crange, '0').name('最小值颜色').onChange(updateScatter);
   p1.addColor(crange, '1').name('最大值颜色').onChange(updateScatter);

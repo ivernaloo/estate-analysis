@@ -11,7 +11,6 @@ router.get('/', function(req, res, next) {
 		community_name: 1,
 		_id: 0
 	}, function(e, ds) {
-		console.log(ds.length)
 		res.json(ds);
 	}).limit(1000);  // 加入了长度限制，加速数据加载
 });
